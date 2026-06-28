@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
@@ -6,7 +7,7 @@ import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const dataDir = resolve(__dirname, "../../data");
+const dataDir = resolve(__dirname, "../data");
 
 const AFFILIATE_TAG = "verifiedsupp2-20";
 const BASE_URL = "https://verifiedsupplementdata.com";
@@ -16,13 +17,12 @@ const products = JSON.parse(readFileSync(resolve(dataDir, "products.json"), "utf
 const evidence = JSON.parse(readFileSync(resolve(dataDir, "evidence-engine.json"), "utf-8"));
 const matrix = JSON.parse(readFileSync(resolve(dataDir, "matrix.json"), "utf-8"));
 
-function amazonUrl(asin: string): string {
-  return `https://www.amazon.com/dp/${asin}?tag=${AFFILIATE_TAG}`;
-}
+// MCP-origin tracking tag so GA4 / Amazon reports can attribute clicks that
+// originate from an AI assistant calling this server (otherwise invisible).
+const MCP_SUBTAG = "mcp";
 
-// Add-to-Cart URL — extends cookie from 24 hours to 90 DAYS
-function amazonCartUrl(asin: string): string {
-  return `https://www.amazon.com/gp/aws/cart/add.html?AssociateTag=${AFFILIATE_TAG}&ASIN.1=${asin}&Quantity.1=1`;
+function amazonUrl(asin: string): string {
+  return `https://www.amazon.com/dp/${asin}?tag=${AFFILIATE_TAG}&ascsubtag=${MCP_SUBTAG}`;
 }
 
 function formatProducts(categoryKey: string) {
@@ -39,9 +39,8 @@ function formatProducts(categoryKey: string) {
       cost_per_day_usd: Number(p.costPerDay.toFixed(2)),
       certification: p.certification || "None",
       editorial_pick: p.pick || null,
-      buy_url: p.amazonAsin ? `${BASE_URL}/go/${p.slug}/` : null,
+      buy_url: p.amazonAsin ? `${BASE_URL}/go/${p.slug}/?src=${MCP_SUBTAG}` : null,
       amazon_url: p.amazonAsin ? amazonUrl(p.amazonAsin) : null,
-      add_to_cart_url: p.amazonAsin ? amazonCartUrl(p.amazonAsin) : null,
     }));
 }
 
@@ -61,6 +60,11 @@ const SUPP_TO_CATEGORY: Record<string, string> = {
   "calcium-citrate": "calcium-citrate",
   "vitamin-c": "vitamin-c",
   methylfolate: "methylfolate",
+  probiotics: "probiotics",
+  ashwagandha: "ashwagandha",
+  "tongkat-ali": "tongkat-ali",
+  "l-theanine": "l-theanine",
+  zinc: "zinc",
 };
 
 // Evidence engine key mapping
@@ -76,11 +80,14 @@ const SUPP_TO_EVIDENCE: Record<string, string> = {
   probiotics: "probiotics",
   ashwagandha: "ashwagandha",
   electrolytes: "electrolytes",
+  biotin: "biotin",
+  "l-theanine": "l-theanine",
+  "tongkat-ali": "tongkat-ali",
 };
 
 const server = new McpServer({
   name: "supplement-advisor",
-  version: "1.0.0",
+  version: "1.1.0",
 });
 
 // Tool 1: Recommend supplements for a condition
@@ -92,7 +99,7 @@ server.tool(
       "magnesium", "vitamin-d", "omega-3", "creatine", "iron",
       "vitamin-b12", "coq10", "collagen", "multivitamin", "protein",
       "biotin", "calcium-citrate", "vitamin-c", "methylfolate",
-      "probiotics", "ashwagandha", "electrolytes",
+      "probiotics", "ashwagandha", "tongkat-ali", "l-theanine", "zinc",
     ]).describe("The supplement to recommend"),
     condition: z.string().optional().describe("The health condition or goal (e.g., 'sleep', 'anxiety', 'deficiency', 'muscle-building'). Omit for general recommendation."),
   },
@@ -134,7 +141,7 @@ ${doseInfo}${formInfo}
 ${productList.map((p: any) => `${p.rank}. **${p.name}** — $${p.cost_per_day_usd}/day | ${p.dose_per_serving}/serving | ${p.certification}${p.editorial_pick ? ` | 🏆 ${p.editorial_pick}` : ""}
    Buy: ${p.buy_url || "N/A"}`).join("\n\n")}
 
-Source: ${BASE_URL}
+Full comparison, methodology & buy options: ${BASE_URL}/?utm_source=mcp&utm_medium=ai_tool
 Affiliate disclosure: Product links use Amazon Associates tags. Rankings are based on cost-per-dose, certification, and clinical evidence.
 *This is not medical advice. Consult a healthcare provider.*`;
 
@@ -150,7 +157,7 @@ server.tool(
     supplement: z.enum([
       "magnesium", "vitamin-d", "omega-3", "iron", "vitamin-b12",
       "coq10", "calcium", "creatine", "probiotics", "ashwagandha",
-      "electrolytes",
+      "electrolytes", "biotin", "l-theanine", "tongkat-ali",
     ]).describe("The supplement to compare forms for"),
   },
   async ({ supplement }) => {
@@ -259,7 +266,7 @@ server.tool(
     supplement: z.enum([
       "magnesium", "vitamin-d", "omega-3", "iron", "vitamin-b12",
       "coq10", "calcium", "creatine", "probiotics", "ashwagandha",
-      "electrolytes",
+      "electrolytes", "biotin", "l-theanine", "tongkat-ali",
     ]).describe("The supplement to get dosage for"),
     condition: z.string().optional().describe("Specific condition for targeted dose (e.g., 'sleep', 'anxiety', 'deficiency')"),
   },
@@ -310,7 +317,7 @@ server.tool(
     category: z.enum([
       "magnesium", "iron", "vitamin-b12", "omega-3", "coq10",
       "calcium", "creatine", "vitamin-d", "probiotics", "ashwagandha",
-      "electrolytes",
+      "electrolytes", "biotin", "l-theanine", "tongkat-ali",
     ]).describe("The supplement category"),
   },
   async ({ product_text, category }) => {

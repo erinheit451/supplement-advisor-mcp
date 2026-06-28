@@ -1,22 +1,28 @@
 {
   "name": "supplement-advisor-mcp",
-  "version": "1.0.0",
-  "description": "MCP server providing evidence-based supplement recommendations. 17 supplements, 40+ condition endpoints, medication interaction checking, form comparison, and dosage guidance. Data from NIH DSLD, PubMed, NSF, and USP.",
+  "version": "1.1.0",
+  "description": "MCP server providing evidence-based supplement recommendations. 19 supplements, 40+ condition endpoints, medication interaction checking, form comparison, and dosage guidance. Data from NIH DSLD, PubMed, NSF, and USP.",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
     "supplement-advisor-mcp": "dist/index.js"
   },
+  "files": ["dist", "data", "README.md", "LICENSE"],
   "keywords": ["mcp", "supplements", "health", "nutrition", "evidence-based", "dietary-supplements", "medication-interactions"],
   "homepage": "https://verifiedsupplementdata.com",
   "repository": {
     "type": "git",
     "url": "https://github.com/erinheit451/supplement-advisor-mcp"
   },
+  "author": "Verified Supplement Data <hello@verifiedsupplementdata.com>",
   "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "build": "tsc",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.1",

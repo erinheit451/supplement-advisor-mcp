@@ -1,0 +1,636 @@
+{
+  "_meta": {
+    "description": "Structured evidence database for Chrome extension and protocol service. Extends matrix.json with form detection, timing rules, warnings, and clinical dose targets.",
+    "version": "1.0.0",
+    "updated": "2026-03-16"
+  },
+
+  "supplement_categories": {
+    "magnesium": {
+      "name": "Magnesium",
+      "amazon_keywords": ["magnesium", "mag glycinate", "mag citrate", "mag oxide", "mag threonate", "mag taurate", "mag malate"],
+      "clinical_doses": {
+        "general": {"min": 200, "max": 400, "unit": "mg elemental", "note": "NIH RDA 310-420mg from all sources"},
+        "sleep": {"min": 320, "max": 400, "unit": "mg elemental", "timing": "30-60 min before bed", "pmid": "33865376"},
+        "anxiety": {"min": 248, "max": 450, "unit": "mg elemental", "pmid": "28445426"},
+        "migraines": {"min": 400, "max": 600, "unit": "mg elemental", "pmid": "27416013"},
+        "muscle_cramps": {"min": 300, "max": 400, "unit": "mg elemental", "pmid": "32967846"}
+      },
+      "forms": {
+        "glycinate": {
+          "detection_keywords": ["glycinate", "bisglycinate", "chelated magnesium", "magnesium glycinate"],
+          "verdict": "excellent",
+          "absorption": "high",
+          "best_for": ["sleep", "anxiety", "general deficiency"],
+          "side_effects": "Minimal GI effects",
+          "our_product_category": "magnesium-glycinate",
+          "page_url": "/magnesium/glycinate-vs-citrate/"
+        },
+        "citrate": {
+          "detection_keywords": ["citrate", "magnesium citrate"],
+          "verdict": "good",
+          "absorption": "high",
+          "best_for": ["constipation", "general deficiency"],
+          "side_effects": "Osmotic laxative effect at higher doses",
+          "our_product_category": null,
+          "page_url": "/magnesium/glycinate-vs-citrate/"
+        },
+        "oxide": {
+          "detection_keywords": ["oxide", "magnesium oxide", "mag ox"],
+          "verdict": "poor",
+          "absorption": "~4%",
+          "best_for": ["constipation only (osmotic laxative)"],
+          "side_effects": "Diarrhea common. Very low absorption.",
+          "warning": "Only ~4% absorbed. Most passes through unabsorbed. Not recommended for correcting deficiency.",
+          "better_alternative": "glycinate",
+          "our_product_category": null,
+          "page_url": "/magnesium/forms-compared/"
+        },
+        "l-threonate": {
+          "detection_keywords": ["threonate", "l-threonate", "magtein"],
+          "verdict": "good_specialized",
+          "absorption": "high (crosses blood-brain barrier)",
+          "best_for": ["cognitive function", "brain fog", "memory"],
+          "side_effects": "Low elemental magnesium content",
+          "warning": "Very low elemental magnesium per dose. Not suitable for general deficiency correction.",
+          "our_product_category": null,
+          "page_url": "/magnesium/forms-compared/"
+        },
+        "taurate": {
+          "detection_keywords": ["taurate", "magnesium taurate"],
+          "verdict": "theoretical",
+          "absorption": "moderate",
+          "best_for": ["cardiac health (theoretical)"],
+          "side_effects": "Minimal",
+          "warning": "Marketed for heart health but NO human RCTs comparing to other forms. Theoretical rationale only (PMID 8692051).",
+          "our_product_category": null,
+          "page_url": "/magnesium/forms-compared/"
+        },
+        "malate": {
+          "detection_keywords": ["malate", "magnesium malate"],
+          "verdict": "good",
+          "absorption": "moderate-high",
+          "best_for": ["muscle pain", "fibromyalgia", "energy"],
+          "side_effects": "Minimal",
+          "our_product_category": null,
+          "page_url": "/magnesium/forms-compared/"
+        }
+      }
+    },
+
+    "iron": {
+      "name": "Iron",
+      "amazon_keywords": ["iron supplement", "ferrous", "iron bisglycinate", "iron pills", "gentle iron", "iron gummies"],
+      "clinical_doses": {
+        "deficiency": {"min": 25, "max": 65, "unit": "mg elemental", "note": "Dose depends on form. Bisglycinate effective at lower doses."},
+        "pregnancy": {"min": 27, "max": 60, "unit": "mg elemental"}
+      },
+      "forms": {
+        "ferrous-sulfate": {
+          "detection_keywords": ["ferrous sulfate", "iron sulfate"],
+          "verdict": "poor_tolerability",
+          "absorption": "moderate",
+          "best_for": ["cheapest option"],
+          "side_effects": "Constipation (25%), nausea (20-30%), 15-25% discontinuation",
+          "warning": "Causes significant GI side effects. Iron bisglycinate has 2-3x better absorption with half the side effects.",
+          "better_alternative": "bisglycinate",
+          "our_product_category": null,
+          "page_url": "/iron/ferrous-sulfate-vs-bisglycinate/"
+        },
+        "bisglycinate": {
+          "detection_keywords": ["bisglycinate", "iron glycinate", "chelated iron", "gentle iron", "ferrochel"],
+          "verdict": "excellent",
+          "absorption": "high (2-3x ferrous sulfate)",
+          "best_for": ["anemia", "pregnancy", "PPI users", "sensitive stomachs"],
+          "side_effects": "37% vs 21% side effect rate (much lower than sulfate)",
+          "our_product_category": "iron-bisglycinate",
+          "page_url": "/iron/ferrous-sulfate-vs-bisglycinate/"
+        },
+        "ferrous-gluconate": {
+          "detection_keywords": ["ferrous gluconate", "iron gluconate"],
+          "verdict": "moderate",
+          "absorption": "moderate",
+          "best_for": ["budget alternative to sulfate"],
+          "side_effects": "Better tolerated than sulfate but less studied than bisglycinate",
+          "our_product_category": null,
+          "page_url": "/iron/ferrous-sulfate-vs-bisglycinate/"
+        },
+        "carbonyl-iron": {
+          "detection_keywords": ["carbonyl iron"],
+          "verdict": "moderate",
+          "absorption": "slow, steady",
+          "best_for": ["reduced acute toxicity risk"],
+          "side_effects": "Lower peak absorption, lower toxicity risk",
+          "our_product_category": null,
+          "page_url": null
+        }
+      }
+    },
+
+    "vitamin-b12": {
+      "name": "Vitamin B12",
+      "amazon_keywords": ["b12", "vitamin b12", "methylcobalamin", "cyanocobalamin", "b-12"],
+      "clinical_doses": {
+        "deficiency": {"min": 1000, "max": 2000, "unit": "mcg", "note": "Sublingual preferred for PPI/metformin/elderly"},
+        "maintenance": {"min": 250, "max": 1000, "unit": "mcg"}
+      },
+      "forms": {
+        "methylcobalamin": {
+          "detection_keywords": ["methylcobalamin", "methyl b12", "methyl b-12"],
+          "verdict": "excellent",
+          "absorption": "high",
+          "best_for": ["neuropathy", "MTHFR variants", "sublingual use", "general"],
+          "side_effects": "None significant",
+          "our_product_category": "vitamin-b12",
+          "page_url": "/b12/methylcobalamin-vs-cyanocobalamin/"
+        },
+        "cyanocobalamin": {
+          "detection_keywords": ["cyanocobalamin", "cyano b12"],
+          "verdict": "adequate",
+          "absorption": "moderate (requires conversion)",
+          "best_for": ["budget option", "stability"],
+          "side_effects": "Contains trace cyanide (harmless at supplement doses)",
+          "warning": "Synthetic form requiring metabolic conversion. Methylcobalamin is preferred for neuropathy (PMID 32716261, 15 RCTs).",
+          "better_alternative": "methylcobalamin",
+          "our_product_category": null,
+          "page_url": "/b12/methylcobalamin-vs-cyanocobalamin/"
+        },
+        "hydroxocobalamin": {
+          "detection_keywords": ["hydroxocobalamin", "hydroxy b12"],
+          "verdict": "excellent",
+          "absorption": "high (longer retention)",
+          "best_for": ["injection form", "cyanide detox"],
+          "side_effects": "None significant",
+          "our_product_category": null,
+          "page_url": "/b12/methylcobalamin-vs-cyanocobalamin/"
+        }
+      }
+    },
+
+    "calcium": {
+      "name": "Calcium",
+      "amazon_keywords": ["calcium supplement", "calcium citrate", "calcium carbonate", "calcium pills"],
+      "clinical_doses": {
+        "general": {"min": 500, "max": 600, "unit": "mg", "note": "Max 500mg per dose (absorption ceiling). Take divided doses."},
+        "osteoporosis": {"min": 1000, "max": 1200, "unit": "mg", "note": "Always with D3+K2"}
+      },
+      "forms": {
+        "citrate": {
+          "detection_keywords": ["calcium citrate", "citracal"],
+          "verdict": "excellent",
+          "absorption": "high (acid-independent)",
+          "best_for": ["PPI users", "bariatric patients", "elderly", "empty stomach"],
+          "side_effects": "Minimal",
+          "our_product_category": "calcium-citrate",
+          "page_url": "/calcium/citrate-vs-carbonate/"
+        },
+        "carbonate": {
+          "detection_keywords": ["calcium carbonate", "caltrate", "tums", "os-cal"],
+          "verdict": "conditional",
+          "absorption": "requires stomach acid",
+          "best_for": ["budget option WITH food AND normal stomach acid"],
+          "side_effects": "Constipation, gas",
+          "warning": "Absorbs 10x LESS than citrate in people with low stomach acid (Recker 1985 NEJM, PMID 4000241). Useless for PPI users, bariatric patients, and elderly with reduced acid.",
+          "better_alternative": "citrate",
+          "our_product_category": null,
+          "page_url": "/calcium/citrate-vs-carbonate/"
+        }
+      }
+    },
+
+    "coq10": {
+      "name": "CoQ10",
+      "amazon_keywords": ["coq10", "ubiquinol", "ubiquinone", "coenzyme q10"],
+      "clinical_doses": {
+        "statin_support": {"min": 100, "max": 200, "unit": "mg", "pmid": "30371340"},
+        "heart_failure": {"min": 200, "max": 400, "unit": "mg"}
+      },
+      "forms": {
+        "ubiquinol": {
+          "detection_keywords": ["ubiquinol", "qh-absorb", "kaneka qh", "reduced coq10", "active coq10"],
+          "verdict": "excellent",
+          "absorption": "high (72% higher than ubiquinone in one crossover, PMID 27128225)",
+          "best_for": ["adults 50+", "statin users", "heart health"],
+          "side_effects": "None significant",
+          "our_product_category": "coq10",
+          "page_url": "/medications/statins/"
+        },
+        "ubiquinone": {
+          "detection_keywords": ["ubiquinone", "coq10", "coenzyme q10"],
+          "verdict": "good",
+          "absorption": "moderate (body converts to ubiquinol)",
+          "best_for": ["budget option", "adults under 50"],
+          "side_effects": "None significant",
+          "note": "Conversion to ubiquinol becomes less efficient with age. Both forms interconvert in the body.",
+          "our_product_category": "coq10",
+          "page_url": "/medications/statins/"
+        }
+      }
+    },
+
+    "omega-3": {
+      "name": "Omega-3 / Fish Oil",
+      "amazon_keywords": ["fish oil", "omega 3", "omega-3", "epa dha", "fish oil capsules", "krill oil"],
+      "clinical_doses": {
+        "general_health": {"min": 1000, "max": 1000, "unit": "mg EPA+DHA combined"},
+        "cardiovascular": {"min": 2000, "max": 4000, "unit": "mg EPA+DHA"},
+        "depression": {"min": 1000, "max": 2000, "unit": "mg EPA+DHA", "note": "EPA-dominant ratio (≥60% EPA)"}
+      },
+      "forms": {
+        "triglyceride": {
+          "detection_keywords": ["triglyceride form", "tg form", "re-esterified", "rtg", "natural triglyceride"],
+          "verdict": "excellent",
+          "absorption": "high (70% better than ethyl ester)",
+          "best_for": ["all uses"],
+          "side_effects": "Fewer fish burps than EE",
+          "our_product_category": "omega-3",
+          "page_url": "/omega-3/forms-compared/"
+        },
+        "ethyl-ester": {
+          "detection_keywords": ["ethyl ester", "ee form", "fish oil concentrate"],
+          "verdict": "poor_value",
+          "absorption": "low (70% less than TG form)",
+          "best_for": ["budget only"],
+          "side_effects": "More fish burps, dissolves Styrofoam",
+          "warning": "70% less bioavailable than triglyceride form. Most cheap fish oils use this form. Check label carefully — if it doesn't say 'triglyceride form,' it's likely ethyl ester.",
+          "better_alternative": "triglyceride",
+          "our_product_category": null,
+          "page_url": "/omega-3/forms-compared/"
+        }
+      }
+    },
+
+    "vitamin-d": {
+      "name": "Vitamin D",
+      "amazon_keywords": ["vitamin d", "vitamin d3", "vitamin d2", "cholecalciferol", "ergocalciferol"],
+      "clinical_doses": {
+        "maintenance": {"min": 1000, "max": 2000, "unit": "IU"},
+        "deficiency_correction": {"min": 2000, "max": 5000, "unit": "IU", "note": "Dose by blood level. Target 40-60 ng/mL."},
+        "immunity": {"min": 1000, "max": 4000, "unit": "IU", "note": "Daily low-dose better than bolus"}
+      },
+      "forms": {
+        "d3": {
+          "detection_keywords": ["d3", "cholecalciferol", "vitamin d3"],
+          "verdict": "excellent",
+          "absorption": "high (2-3x more effective than D2 at raising blood levels)",
+          "best_for": ["all uses"],
+          "our_product_category": "vitamin-d3",
+          "page_url": "/vitamin-d/d2-vs-d3/"
+        },
+        "d2": {
+          "detection_keywords": ["d2", "ergocalciferol", "vitamin d2"],
+          "verdict": "poor",
+          "absorption": "low",
+          "best_for": ["vegans only (mushroom-derived)"],
+          "warning": "2-3x less effective than D3 at raising blood levels. D3 is preferred unless vegan.",
+          "better_alternative": "d3",
+          "our_product_category": null,
+          "page_url": "/vitamin-d/d2-vs-d3/"
+        }
+      }
+    },
+
+    "creatine": {
+      "name": "Creatine",
+      "amazon_keywords": ["creatine", "creatine monohydrate", "creatine hcl", "creatine gummies"],
+      "clinical_doses": {
+        "maintenance": {"min": 3, "max": 5, "unit": "g/day"},
+        "loading": {"min": 20, "max": 20, "unit": "g/day for 5-7 days, then 3-5g/day"}
+      },
+      "forms": {
+        "monohydrate": {
+          "detection_keywords": ["monohydrate", "creapure", "creatine monohydrate"],
+          "verdict": "excellent",
+          "absorption": ">95% bioavailability",
+          "best_for": ["everything — most researched supplement in existence"],
+          "our_product_category": "creatine",
+          "page_url": "/creatine/forms-compared/"
+        },
+        "hcl": {
+          "detection_keywords": ["hcl", "creatine hcl", "creatine hydrochloride", "con-cret"],
+          "verdict": "overhyped",
+          "absorption": "Not proven superior to monohydrate",
+          "best_for": ["water solubility only (mixes better)"],
+          "warning": "5-10x more expensive than monohydrate. Better solubility does NOT equal better absorption. No study has shown HCl superior to monohydrate. ISSN confirms monohydrate is the gold standard.",
+          "better_alternative": "monohydrate",
+          "our_product_category": null,
+          "page_url": "/creatine/forms-compared/"
+        }
+      }
+    },
+
+    "probiotics": {
+      "name": "Probiotics",
+      "amazon_keywords": ["probiotic", "probiotics", "lactobacillus", "bifidobacterium", "saccharomyces", "gut health", "probiotic capsules"],
+      "clinical_doses": {
+        "general": {"min": 1, "max": 100, "unit": "billion CFU", "note": "Dose is strain-dependent. CFU count alone is meaningless without strain specificity."},
+        "antibiotic_associated": {"min": 10, "max": 20, "unit": "billion CFU", "note": "L. rhamnosus GG or S. boulardii specifically studied"},
+        "ibs": {"min": 10, "max": 50, "unit": "billion CFU", "note": "VSL#3 or B. infantis 35624 specifically studied"},
+        "vaginal_health": {
+          "min": 2,
+          "max": 5,
+          "unit": "billion CFU",
+          "timing": "daily with food, oral administration",
+          "pmid": "14651462",
+          "note": "Specific strains required: L. rhamnosus GR-1 + L. reuteri RC-14"
+        },
+        "immune": {
+          "min": 10,
+          "max": 20,
+          "unit": "billion CFU",
+          "timing": "daily with food",
+          "pmid": "19240660",
+          "note": "Best evidence for L. rhamnosus GG"
+        },
+        "travelers_diarrhea": {
+          "min": 250,
+          "max": 500,
+          "unit": "mg S. boulardii",
+          "timing": "daily, start 5 days before travel through trip duration",
+          "pmid": "17298915"
+        }
+      },
+      "forms": {
+        "strain_specific": {
+          "detection_keywords": ["lactobacillus rhamnosus gg", "saccharomyces boulardii", "vsl#3", "bifidobacterium infantis", "align", "culturelle", "florastor"],
+          "verdict": "excellent",
+          "absorption": "strain-dependent survivability",
+          "best_for": ["condition-specific use with matching clinical evidence"],
+          "side_effects": "Generally mild GI adjustment in first 1-2 weeks",
+          "our_product_category": null,
+          "page_url": "/probiotics/"
+        },
+        "generic_blend": {
+          "detection_keywords": ["probiotic blend", "probiotic complex", "50 billion", "100 billion", "multi-strain"],
+          "verdict": "unproven",
+          "absorption": "unknown — strain survivability untested for most blends",
+          "best_for": ["general gut health (weak evidence)"],
+          "side_effects": "Generally mild",
+          "warning": "High CFU counts are marketing, not science. AGA recommends against probiotics for most digestive conditions. Evidence is strain-specific — a '50 billion CFU blend' with unstudied strains has no clinical backing.",
+          "our_product_category": null,
+          "page_url": "/probiotics/"
+        }
+      }
+    },
+
+    "ashwagandha": {
+      "name": "Ashwagandha",
+      "amazon_keywords": ["ashwagandha", "ksm-66", "sensoril", "withania somnifera", "adaptogen"],
+      "clinical_doses": {
+        "stress": {"min": 300, "max": 600, "unit": "mg KSM-66 extract", "note": "Standardized to 5% withanolides", "pmid": "23439798"},
+        "sleep": {"min": 125, "max": 300, "unit": "mg", "note": "Sensoril (125-250mg) or KSM-66 (300mg)", "pmid": "32540634"},
+        "anxiety": {"min": 300, "max": 600, "unit": "mg KSM-66", "pmid": "31517876"}
+      },
+      "forms": {
+        "ksm-66": {
+          "detection_keywords": ["ksm-66", "ksm66", "full-spectrum root extract"],
+          "verdict": "excellent",
+          "absorption": "standardized extract, well-studied",
+          "best_for": ["stress", "anxiety", "cortisol reduction", "general adaptogen"],
+          "side_effects": "Generally well-tolerated. Cycle 8 weeks on / 2 weeks off.",
+          "our_product_category": null,
+          "page_url": "/ashwagandha/"
+        },
+        "sensoril": {
+          "detection_keywords": ["sensoril", "root and leaf extract"],
+          "verdict": "good",
+          "absorption": "standardized extract",
+          "best_for": ["sleep", "calming (slightly more sedating than KSM-66)"],
+          "side_effects": "More sedating than KSM-66 — better for evening/sleep use",
+          "our_product_category": null,
+          "page_url": "/ashwagandha/"
+        },
+        "generic_powder": {
+          "detection_keywords": ["ashwagandha root powder", "ashwagandha powder", "organic ashwagandha"],
+          "verdict": "poor",
+          "absorption": "unstandardized, variable withanolide content",
+          "best_for": ["budget option only"],
+          "warning": "Generic root powder has no standardized withanolide content. Clinical trials use KSM-66 or Sensoril extracts, not raw powder. You don't know what dose of active compounds you're getting.",
+          "better_alternative": "ksm-66",
+          "our_product_category": null,
+          "page_url": "/ashwagandha/"
+        }
+      }
+    },
+
+    "electrolytes": {
+      "name": "Electrolytes",
+      "amazon_keywords": ["electrolyte", "electrolytes", "electrolyte powder", "electrolyte drink", "hydration", "lmnt", "liquid iv", "nuun"],
+      "clinical_doses": {
+        "general": {"min": 500, "max": 1000, "unit": "mg sodium per serving", "note": "Plus potassium 200-400mg and magnesium 50-100mg. Needs scale with sweat rate."},
+        "athletic": {"min": 500, "max": 1500, "unit": "mg sodium per hour of exercise", "note": "ACSM recommends replacing sweat losses. Heavy sweaters may need 1000-1500mg/hr."},
+        "fasting_keto": {"min": 2000, "max": 5000, "unit": "mg sodium per day", "note": "Ketosis increases sodium excretion. Must be sugar-free."}
+      },
+      "forms": {
+        "powder_sugar_free": {
+          "detection_keywords": ["sugar free", "zero sugar", "no sugar", "lmnt", "keto electrolyte"],
+          "verdict": "excellent",
+          "absorption": "good — direct mineral absorption",
+          "best_for": ["fasting", "keto", "low-carb", "general hydration"],
+          "side_effects": "None significant",
+          "our_product_category": null,
+          "page_url": "/electrolytes/"
+        },
+        "powder_with_sugar": {
+          "detection_keywords": ["liquid iv", "drip drop", "glucose", "sugar", "dextrose"],
+          "verdict": "good_for_athletes",
+          "absorption": "enhanced by sodium-glucose co-transport (SGLT1)",
+          "best_for": ["endurance athletes", "illness rehydration", "heavy sweating"],
+          "side_effects": "Added calories/sugar",
+          "note": "Glucose-sodium co-transport enhances fluid absorption in the small intestine. This is the mechanism behind WHO ORS. Athletes and those rehydrating from illness benefit from small amounts of sugar.",
+          "our_product_category": null,
+          "page_url": "/electrolytes/"
+        }
+      }
+    },
+
+    "biotin": {
+      "name": "Biotin",
+      "amazon_keywords": ["biotin", "hair vitamin", "hair gummy", "vitamin b7", "vitamin h"],
+      "clinical_doses": {
+        "hair_maintenance": {"min": 2500, "max": 5000, "unit": "mcg", "note": "Evidence is WEAK for non-deficient people (PMID 39148962)"}
+      },
+      "forms": {
+        "d-biotin": {
+          "detection_keywords": ["biotin", "d-biotin"],
+          "verdict": "adequate",
+          "absorption": "high",
+          "best_for": ["hair (weak evidence)", "nail support", "actual biotin deficiency"],
+          "warning": "A 2024 review (PMID 39148962) found biotin for hair loss is 'not supported by high-quality studies' in non-deficient people. At $0.06/day it's cheap insurance, but don't expect miracles. Megadosing (>5000mcg) has no additional evidence. Can interfere with thyroid and troponin blood tests — stop 48-72 hours before bloodwork.",
+          "our_product_category": "biotin",
+          "page_url": "/symptoms/hair-falling-out/"
+        }
+      }
+    },
+
+    "l-theanine": {
+      "name": "L-Theanine",
+      "amazon_keywords": ["l-theanine", "theanine", "suntheanine"],
+      "clinical_doses": {
+        "anxiety": {"min": 200, "max": 400, "unit": "mg", "note": "Can be taken as needed for acute anxiety", "pmid": "31623400"},
+        "sleep": {"min": 200, "max": 400, "unit": "mg", "timing": "30-60 min before bed", "pmid": "22214254"}
+      },
+      "forms": {
+        "suntheanine": {
+          "detection_keywords": ["suntheanine", "l-theanine"],
+          "verdict": "excellent",
+          "absorption": "rapidly absorbed, crosses blood-brain barrier",
+          "best_for": ["anxiety", "sleep", "focus without sedation"],
+          "side_effects": "None significant at recommended doses",
+          "our_product_category": "l-theanine",
+          "page_url": "/stacks/anxiety-sleep/"
+        }
+      },
+      "key_studies": [
+        {"pmid": "31623400", "title": "Hidese 2019 — L-theanine RCT for stress in healthy adults (n=30)", "finding": "200mg/day for 4 weeks reduced stress-related symptoms (PSQI sleep subscores improved, p<0.05)"},
+        {"pmid": "31758301", "title": "Everett 2020 — Systematic review of L-theanine for stress and anxiety (9 studies)", "finding": "200-400mg/day may assist in reducing stress and anxiety in stressful conditions"},
+        {"pmid": "22214254", "title": "Lyon 2011 — L-theanine RCT for sleep in ADHD boys (n=98)", "finding": "400mg/day significantly improved sleep efficiency and reduced activity during sleep vs placebo"},
+        {"pmid": "30580081", "title": "Sarris 2019 — L-theanine adjunctive for GAD RCT (n=46)", "finding": "450mg/day did not significantly outperform placebo for GAD (negative result)"},
+        {"pmid": "38758503", "title": "AlphaWave 2024 — L-theanine RCT for stress in healthy adults (n=100)", "finding": "200mg/day for 28 days reduced cortisol and improved stress measures vs placebo"},
+        {"pmid": "34559859", "title": "Cheah 2021 — Ashwagandha sleep meta-analysis (5 RCTs, n=400)", "finding": "Small but significant sleep improvement, more prominent with insomnia diagnosis and doses >=600mg/day"}
+      ]
+    },
+
+    "tongkat-ali": {
+      "name": "Tongkat Ali (Eurycoma longifolia)",
+      "amazon_keywords": ["tongkat ali", "longjack", "eurycoma", "malaysian ginseng"],
+      "clinical_doses": {
+        "testosterone": {"min": 200, "max": 400, "unit": "mg standardized extract", "note": "Standardized to 2-10% eurycomanone. Effect primarily in men with low-normal T.", "pmid": "36013514"},
+        "stress_cortisol": {"min": 200, "max": 200, "unit": "mg standardized extract", "pmid": "23705671"}
+      },
+      "forms": {
+        "standardized_extract": {
+          "detection_keywords": ["eurycomanone", "standardized", "longjack extract", "200:1", "100:1"],
+          "verdict": "good",
+          "absorption": "standardized extract well-studied",
+          "best_for": ["testosterone support", "cortisol reduction", "stress"],
+          "side_effects": "Generally well-tolerated. Insomnia at high doses. Cycle 8 weeks on / 2 weeks off.",
+          "our_product_category": "tongkat-ali",
+          "page_url": "/tongkat-ali/"
+        },
+        "raw_powder": {
+          "detection_keywords": ["tongkat ali powder", "root powder", "raw powder"],
+          "verdict": "poor",
+          "absorption": "unstandardized, unknown eurycomanone content",
+          "best_for": ["nothing — unstandardized"],
+          "warning": "Raw root powder has no standardized active compound content. Clinical trials use standardized extracts.",
+          "better_alternative": "standardized_extract",
+          "our_product_category": null,
+          "page_url": "/tongkat-ali/"
+        }
+      },
+      "key_studies": [
+        {"pmid": "36013514", "title": "Leisegang 2022 — Systematic review & meta-analysis of tongkat ali and testosterone (9 studies, 5 RCTs pooled)", "finding": "Significant increase in total testosterone (SMD=1.352, 95% CI 0.565-2.138, p=0.001). Effect confirmed in hypogonadism subgroup."},
+        {"pmid": "23705671", "title": "Talbott 2013 — RCT in moderately stressed adults (n=63)", "finding": "200mg/day for 4 weeks: cortisol -16%, testosterone +37%, tension -11%, anger -12% vs placebo."},
+        {"pmid": "21671978", "title": "Tambi 2012 — Open-label in late-onset hypogonadism (n=76)", "finding": "200mg/day for 1 month: 90.8% of patients showed normal testosterone values after treatment."},
+        {"pmid": "33541567", "title": "Firdaus 2021 — 6-month double-blind placebo-controlled RCT in ADAM (n=45)", "finding": "200mg/day + training significantly improved erectile function and increased total testosterone. No serious adverse events."},
+        {"pmid": "24386995", "title": "George & Henkel 2014 — Review of phytoandrogenic properties", "finding": "Tongkat ali may serve as alternative to TRT for testosterone deficiency syndrome via SHBG reduction and Leydig cell support."},
+        {"pmid": "16281088", "title": "Yakubu 2005 — Fadogia agrestis aphrodisiac study in RATS (NOT human)", "finding": "Rat study only. Testosterone increased dose-dependently over 5 days. Zero human data exists for fadogia."},
+        {"pmid": "18023305", "title": "Yakubu 2008 — Fadogia agrestis testicular toxicity in RATS", "finding": "28-day rat study found adverse effects on testicular function at moderate and high doses."},
+        {"pmid": "19755438", "title": "Yakubu 2009 — Fadogia agrestis liver/kidney toxicity in RATS", "finding": "Liver and kidney enzyme changes at all doses over 28 days. Increased oxidative stress markers."}
+      ]
+    }
+  },
+
+  "timing_rules": [
+    {
+      "rule": "iron_calcium_separation",
+      "supplements": ["iron", "calcium"],
+      "instruction": "Take iron and calcium at LEAST 2 hours apart. Calcium inhibits iron absorption.",
+      "severity": "high"
+    },
+    {
+      "rule": "iron_vitamin_c_synergy",
+      "supplements": ["iron", "vitamin-c"],
+      "instruction": "Take iron WITH vitamin C to enhance absorption (up to 6x improvement).",
+      "severity": "helpful"
+    },
+    {
+      "rule": "magnesium_bedtime",
+      "supplements": ["magnesium"],
+      "instruction": "Take magnesium glycinate 30-60 minutes before bed for sleep benefit. Take with food to reduce GI effects.",
+      "severity": "helpful"
+    },
+    {
+      "rule": "fat_soluble_with_food",
+      "supplements": ["vitamin-d", "coq10", "omega-3"],
+      "instruction": "Take fat-soluble supplements with a meal containing fat for best absorption.",
+      "severity": "moderate"
+    },
+    {
+      "rule": "calcium_divided_doses",
+      "supplements": ["calcium"],
+      "instruction": "Max 500mg calcium per dose. Absorption drops significantly above this. Split into 2 doses if taking 1000mg+.",
+      "severity": "moderate"
+    },
+    {
+      "rule": "b12_sublingual",
+      "supplements": ["vitamin-b12"],
+      "instruction": "For PPI users, metformin users, elderly, and bariatric patients: use sublingual B12 to bypass gut absorption issues.",
+      "severity": "high"
+    },
+    {
+      "rule": "zinc_copper_balance",
+      "supplements": ["zinc"],
+      "instruction": "If taking zinc >30mg/day long-term, add 1-2mg copper to prevent copper depletion.",
+      "severity": "moderate"
+    },
+    {
+      "rule": "multivitamin_with_meal",
+      "supplements": ["multivitamin"],
+      "instruction": "Take multivitamin with your largest meal. Reduces nausea and improves absorption of fat-soluble vitamins.",
+      "severity": "helpful"
+    },
+    {
+      "rule": "biotin_lab_interference",
+      "supplements": ["biotin"],
+      "instruction": "Stop biotin 48-72 hours before any blood tests. High-dose biotin interferes with thyroid (TSH, T3, T4) and cardiac troponin assays, potentially giving false results.",
+      "severity": "high"
+    }
+  ],
+
+  "protocol_templates": {
+    "glp1_user": {
+      "name": "GLP-1 / Ozempic / Wegovy / Mounjaro",
+      "required": ["protein", "multivitamin"],
+      "recommended": ["biotin", "collagen", "magnesium"],
+      "rationale": "Up to 40% of weight lost is muscle. 22.4% develop nutritional deficiency within 12 months (PMID 40584822). Joint advisory recommends 1.2-1.6g/kg protein + proactive supplementation (PMID 40445127).",
+      "page_url": "/stacks/glp1-ozempic/"
+    },
+    "statin_user": {
+      "name": "Statin User",
+      "required": ["coq10"],
+      "recommended": ["vitamin-d", "omega-3"],
+      "rationale": "Statins reduce CoQ10 16-54% (PMID 30414615). 3 of 4 meta-analyses show CoQ10 100-200mg/day helps muscle symptoms. Statins do NOT deplete vitamin D (PMID 36416841 — VITAL trial negative).",
+      "page_url": "/medications/statins/"
+    },
+    "ppi_user": {
+      "name": "PPI User (Omeprazole, Nexium, etc.)",
+      "required": ["magnesium", "vitamin-b12", "calcium"],
+      "recommended": ["iron", "vitamin-c"],
+      "rationale": "PPIs deplete 5 nutrients via acid-dependent absorption mechanisms. Magnesium OR 1.71 (PMID 25023992), B12 OR 1.65 (PMID 23325883), calcium hip fracture RR 1.30.",
+      "page_url": "/medications/ppis/"
+    },
+    "metformin_user": {
+      "name": "Metformin User",
+      "required": ["vitamin-b12"],
+      "recommended": ["multivitamin"],
+      "rationale": "Metformin reduces B12 by ~77 pg/mL (PMID 27130885). 5.8-30% of users become deficient. Combined with PPI: 34% greater reduction.",
+      "page_url": "/medications/metformin/"
+    },
+    "birth_control_user": {
+      "name": "Oral Contraceptive User",
+      "required": ["multivitamin", "magnesium"],
+      "recommended": ["vitamin-b12"],
+      "rationale": "Depletes B6 (mood via tryptophan metabolism), B12, folate (critical pre-pregnancy), magnesium, zinc. Methylfolate preferred over folic acid for 40% with MTHFR variants.",
+      "page_url": "/medications/birth-control/"
+    },
+    "anxiety_sleep": {
+      "name": "Anxiety + Sleep Stack",
+      "required": ["magnesium", "ashwagandha", "l-theanine"],
+      "recommended": [],
+      "rationale": "Three supplements targeting anxiety and sleep through different mechanisms: magnesium (NMDA antagonist + GABA agonist), ashwagandha KSM-66 (cortisol modulation via HPA axis), L-theanine (alpha-wave promotion + GABA/serotonin support). No known negative interactions between the three. Total cost ~$0.68/day.",
+      "page_url": "/stacks/anxiety-sleep/"
+    }
+  }
+}

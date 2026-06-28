@@ -1,0 +1,22 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.schema.json",
+  "name": "io.github.erinheit451/supplement-advisor-mcp",
+  "description": "Evidence-based supplement recommendations: ranked products by cost-per-effective-dose, clinical doses with PubMed citations, form/bioavailability comparison, and medication-nutrient interaction checks. Data from NIH DSLD, PubMed, NSF, and USP.",
+  "version": "1.1.0",
+  "repository": {
+    "url": "https://github.com/erinheit451/supplement-advisor-mcp",
+    "source": "github"
+  },
+  "websiteUrl": "https://verifiedsupplementdata.com",
+  "packages": [
+    {
+      "registryType": "npm",
+      "registryBaseUrl": "https://registry.npmjs.org",
+      "identifier": "supplement-advisor-mcp",
+      "version": "1.1.0",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
+}

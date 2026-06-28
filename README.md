@@ -1,6 +1,6 @@
 # Supplement Advisor MCP Server
 
-Evidence-based supplement recommendation MCP server. 17 supplements, 40+ conditions, medication interaction checking, form quality classification. Data sourced from NIH DSLD, PubMed, NSF, and USP.
+Evidence-based supplement recommendation MCP server. 19 supplements, 40+ conditions, medication interaction checking, form quality classification. Data sourced from NIH DSLD, PubMed, NSF, and USP.
 
 Built for use with Claude, Cursor, Windsurf, and any MCP-compatible client.
 
@@ -18,7 +18,28 @@ Built for use with Claude, Cursor, Windsurf, and any MCP-compatible client.
 
 Magnesium, Vitamin D, Omega-3, Creatine, Iron, Vitamin B12, CoQ10, Collagen, Multivitamin, Protein, Biotin, Calcium Citrate, Vitamin C, Methylfolate, Probiotics, Ashwagandha, Electrolytes
 
-## Installation
+## Quick Start (npx)
+
+```bash
+npx supplement-advisor-mcp
+```
+
+## Claude Desktop / Claude Code Configuration
+
+Add to your MCP config:
+
+```json
+{
+  "mcpServers": {
+    "supplement-advisor": {
+      "command": "npx",
+      "args": ["-y", "supplement-advisor-mcp"]
+    }
+  }
+}
+```
+
+## Installation (from source)
 
 ```bash
 git clone https://github.com/erinheit451/supplement-advisor-mcp.git
@@ -26,21 +47,6 @@ cd supplement-advisor-mcp
 npm install
 npm run build
 npm start
-```
-
-## Claude Desktop / Claude Code Configuration
-
-Add to your `~/.claude/mcp.json` (or Claude Desktop config):
-
-```json
-{
-  "mcpServers": {
-    "supplement-advisor": {
-      "command": "node",
-      "args": ["/path/to/supplement-advisor-mcp/dist/index.js"]
-    }
-  }
-}
 ```
 
 ## Data Sources
