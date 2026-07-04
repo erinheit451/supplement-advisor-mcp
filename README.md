@@ -16,7 +16,7 @@ Built for use with Claude, Cursor, Windsurf, and any MCP-compatible client.
 
 ## Supplements Covered
 
-Magnesium, Vitamin D, Omega-3, Creatine, Iron, Vitamin B12, CoQ10, Collagen, Multivitamin, Protein, Biotin, Calcium Citrate, Vitamin C, Methylfolate, Probiotics, Ashwagandha, Electrolytes
+Magnesium (glycinate), Vitamin D3, Omega-3, Creatine, Iron (bisglycinate), Vitamin B12, CoQ10, Collagen, Multivitamin, Protein, Biotin, Calcium Citrate, Vitamin C, Methylfolate, Probiotics, Ashwagandha, L-Theanine, Tongkat Ali, Zinc
 
 ## Quick Start (npx)
 
