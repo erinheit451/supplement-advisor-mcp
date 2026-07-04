@@ -1,6 +1,7 @@
 {
   "name": "supplement-advisor-mcp",
   "version": "1.1.0",
+  "mcpName": "io.github.erinheit451/supplement-advisor-mcp",
   "description": "MCP server providing evidence-based supplement recommendations. 19 supplements, 40+ condition endpoints, medication interaction checking, form comparison, and dosage guidance. Data from NIH DSLD, PubMed, NSF, and USP.",
   "type": "module",
   "main": "dist/index.js",
