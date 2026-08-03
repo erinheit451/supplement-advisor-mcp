@@ -27,6 +27,14 @@ console.error(
     (catalog.pricesAsOf ? ` (prices as of ${catalog.pricesAsOf})` : ""),
 );
 
+// MCP-origin tracking so GA4 / Amazon reports can attribute clicks that
+// originate from an AI assistant calling this server (otherwise invisible).
+const MCP_SUBTAG = "mcp";
+
+// The live feed stamps its own surface in the subtag (…__acp). Re-stamp it for
+// this server so MCP-driven orders are not reported as feed-driven ones.
+const asMcpSubtag = (url: string) => url.replace(/__acp(?=&|$)/, `__${MCP_SUBTAG}`);
+
 function formatProducts(categoryKey: string) {
   const items = catalog.categories[categoryKey] || [];
   return [...items]
@@ -41,8 +49,8 @@ function formatProducts(categoryKey: string) {
       cost_per_day_usd: Number(p.costPerDay.toFixed(2)),
       certification: p.certification,
       editorial_pick: p.pick,
-      buy_url: `${BASE_URL}/go/${p.slug}/`,
-      amazon_url: p.buyUrl,
+      buy_url: `${BASE_URL}/go/${p.slug}/?src=${MCP_SUBTAG}`,
+      amazon_url: asMcpSubtag(p.buyUrl),
       add_to_cart_url: p.cartUrl,
       // Set when the requested product is unavailable and the link points at a
       // verified alternative. Tell the user — do not silently swap their brand.
@@ -113,11 +121,14 @@ const SUPP_TO_EVIDENCE: Record<string, string> = {
   probiotics: "probiotics",
   ashwagandha: "ashwagandha",
   electrolytes: "electrolytes",
+  biotin: "biotin",
+  "l-theanine": "l-theanine",
+  "tongkat-ali": "tongkat-ali",
 };
 
 const server = new McpServer({
   name: "supplement-advisor",
-  version: "1.0.0",
+  version: "1.1.0",
 });
 
 // Tool 1: Recommend supplements for a condition
@@ -171,7 +182,7 @@ ${doseInfo}${formInfo}
 ${productList.map((p: any) => `${p.rank}. **${p.name}** — $${p.cost_per_day_usd}/day | ${p.dose_per_serving}/serving | ${p.certification}${p.editorial_pick ? ` | 🏆 ${p.editorial_pick}` : ""}
    Buy: ${p.buy_url || "N/A"}${p.substituted_for_unavailable ? `\n   ⚠️ ${p.substituted_for_unavailable} is currently unavailable — this link goes to a verified alternative. Tell the user before they buy.` : ""}`).join("\n\n")}
 
-Source: ${BASE_URL}
+Full comparison, methodology & buy options: ${BASE_URL}/?utm_source=mcp&utm_medium=ai_tool
 ${priceProvenance()}
 Affiliate disclosure: Product links use Amazon Associates tags. Rankings are based on cost-per-dose, certification, and clinical evidence.
 *This is not medical advice. Consult a healthcare provider.*`;
@@ -188,7 +199,7 @@ server.tool(
     supplement: z.enum([
       "magnesium", "vitamin-d", "omega-3", "iron", "vitamin-b12",
       "coq10", "calcium", "creatine", "probiotics", "ashwagandha",
-      "electrolytes",
+      "electrolytes", "biotin", "l-theanine", "tongkat-ali",
     ]).describe("The supplement to compare forms for"),
   },
   async ({ supplement }) => {
@@ -297,7 +308,7 @@ server.tool(
     supplement: z.enum([
       "magnesium", "vitamin-d", "omega-3", "iron", "vitamin-b12",
       "coq10", "calcium", "creatine", "probiotics", "ashwagandha",
-      "electrolytes",
+      "electrolytes", "biotin", "l-theanine", "tongkat-ali",
     ]).describe("The supplement to get dosage for"),
     condition: z.string().optional().describe("Specific condition for targeted dose (e.g., 'sleep', 'anxiety', 'deficiency')"),
   },
@@ -348,7 +359,7 @@ server.tool(
     category: z.enum([
       "magnesium", "iron", "vitamin-b12", "omega-3", "coq10",
       "calcium", "creatine", "vitamin-d", "probiotics", "ashwagandha",
-      "electrolytes",
+      "electrolytes", "biotin", "l-theanine", "tongkat-ali",
     ]).describe("The supplement category"),
   },
   async ({ product_text, category }) => {
