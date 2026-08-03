@@ -1,67 +1,104 @@
+#!/usr/bin/env node
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 import { readFileSync } from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
+import { loadCatalog } from "./catalog.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const dataDir = resolve(__dirname, "../../data");
+// dist/index.js sits one level under the package root, so data/ is ../data.
+// The published 1.0.0 shipped "../../data", which resolves outside the package
+// and crashes the server on startup before it can serve a single request.
+const dataDir = resolve(__dirname, "../data");
 
-const AFFILIATE_TAG = "verifiedsupp2-20";
 const BASE_URL = "https://verifiedsupplementdata.com";
 
-// Load data files
-const products = JSON.parse(readFileSync(resolve(dataDir, "products.json"), "utf-8"));
 const evidence = JSON.parse(readFileSync(resolve(dataDir, "evidence-engine.json"), "utf-8"));
 const matrix = JSON.parse(readFileSync(resolve(dataDir, "matrix.json"), "utf-8"));
 
-function amazonUrl(asin: string): string {
-  return `https://www.amazon.com/dp/${asin}?tag=${AFFILIATE_TAG}`;
-}
-
-// Add-to-Cart URL — extends cookie from 24 hours to 90 DAYS
-function amazonCartUrl(asin: string): string {
-  return `https://www.amazon.com/gp/aws/cart/add.html?AssociateTag=${AFFILIATE_TAG}&ASIN.1=${asin}&Quantity.1=1`;
-}
+// Prices and buy links come from the live site when reachable, so this server can
+// never quote a stale price or link to a delisted product. Falls back to the
+// bundled snapshot offline. See src/catalog.ts.
+const catalog = await loadCatalog(dataDir);
+console.error(
+  `[supplement-advisor] catalog: ${catalog.productCount} products from ${catalog.source}` +
+    (catalog.pricesAsOf ? ` (prices as of ${catalog.pricesAsOf})` : ""),
+);
 
 function formatProducts(categoryKey: string) {
-  const items = products.categories?.[categoryKey] || [];
+  const items = catalog.categories[categoryKey] || [];
   return [...items]
-    .sort((a: any, b: any) => a.costPerDay - b.costPerDay)
-    .map((p: any, i: number) => ({
+    .sort((a, b) => a.costPerDay - b.costPerDay)
+    .map((p, i) => ({
       rank: i + 1,
       name: p.name,
       brand: p.brand,
-      dose_per_serving: `${p.mgPerServing}${p.unit || "mg"}`,
+      dose_per_serving: p.dosePerServing,
       serving_size: p.servingSize,
       price_usd: p.price,
       cost_per_day_usd: Number(p.costPerDay.toFixed(2)),
-      certification: p.certification || "None",
-      editorial_pick: p.pick || null,
-      buy_url: p.amazonAsin ? `${BASE_URL}/go/${p.slug}/` : null,
-      amazon_url: p.amazonAsin ? amazonUrl(p.amazonAsin) : null,
-      add_to_cart_url: p.amazonAsin ? amazonCartUrl(p.amazonAsin) : null,
+      certification: p.certification,
+      editorial_pick: p.pick,
+      buy_url: `${BASE_URL}/go/${p.slug}/`,
+      amazon_url: p.buyUrl,
+      add_to_cart_url: p.cartUrl,
+      // Set when the requested product is unavailable and the link points at a
+      // verified alternative. Tell the user — do not silently swap their brand.
+      substituted_for_unavailable: p.substituteFor,
+      ...(p.clinicalDose ? { clinical_dose: p.clinicalDose } : {}),
+      ...(p.formVerdict ? { form_verdict: p.formVerdict } : {}),
     }));
 }
 
-// Supplement ID → product category key mapping
-const SUPP_TO_CATEGORY: Record<string, string> = {
+/** Provenance line so an agent can tell the user how fresh these prices are. */
+function priceProvenance(): string {
+  return catalog.source === "live"
+    ? `Prices and availability fetched live from ${BASE_URL}.`
+    : `Offline catalog${catalog.pricesAsOf ? `, prices verified ${catalog.pricesAsOf}` : ""} — verify current price before purchase.`;
+}
+
+// Common names that differ from the catalog's category key. Everything else
+// resolves against the catalog directly — see resolveCategory.
+const SUPP_ALIASES: Record<string, string> = {
   magnesium: "magnesium-glycinate",
   "vitamin-d": "vitamin-d3",
-  "omega-3": "omega-3",
-  creatine: "creatine",
+  "vitamin-d3": "vitamin-d3",
   iron: "iron-bisglycinate",
-  "vitamin-b12": "vitamin-b12",
-  coq10: "coq10",
-  collagen: "collagen",
-  multivitamin: "multivitamin",
-  protein: "protein",
-  biotin: "biotin",
-  "calcium-citrate": "calcium-citrate",
-  "vitamin-c": "vitamin-c",
-  methylfolate: "methylfolate",
+  calcium: "calcium-citrate",
+  b12: "vitamin-b12",
+  folate: "methylfolate",
+  "fish-oil": "omega-3",
+  "vitamin-k": "vitamin-k2",
+  theanine: "l-theanine",
+  glutamine: "l-glutamine",
+  tyrosine: "l-tyrosine",
+  carnitine: "l-carnitine",
+  arginine: "l-arginine",
+  citrulline: "l-citrulline",
 };
+
+/**
+ * Resolve whatever an agent asked for to a catalog category.
+ *
+ * This used to be a hardcoded 14-entry map paired with a 17-value enum, so
+ * `probiotics`, `ashwagandha` and `electrolytes` were advertised in the tool
+ * schema but returned "Unknown supplement" — the two lists had drifted apart.
+ * Resolving against the catalog itself means all 116 categories work, and new
+ * ones the site adds work without a release here.
+ */
+function resolveCategory(input: string): string | null {
+  const k = input.trim().toLowerCase().replace(/\s+/g, "-");
+  if (SUPP_ALIASES[k] && catalog.categories[SUPP_ALIASES[k]]) return SUPP_ALIASES[k];
+  if (catalog.categories[k]) return k;
+  // tolerate singular/plural and a missing "vitamin-" prefix
+  for (const cand of [k.replace(/s$/, ""), `${k}s`, `vitamin-${k}`])
+    if (catalog.categories[cand]) return cand;
+  return null;
+}
+
+const availableCategories = () => Object.keys(catalog.categories).sort();
 
 // Evidence engine key mapping
 const SUPP_TO_EVIDENCE: Record<string, string> = {
@@ -88,22 +125,22 @@ server.tool(
   "recommend_supplement",
   "Get evidence-based supplement recommendations for a specific condition. Returns ranked products with clinical evidence, dosing, cost-per-dose, and purchase links.",
   {
-    supplement: z.enum([
-      "magnesium", "vitamin-d", "omega-3", "creatine", "iron",
-      "vitamin-b12", "coq10", "collagen", "multivitamin", "protein",
-      "biotin", "calcium-citrate", "vitamin-c", "methylfolate",
-      "probiotics", "ashwagandha", "electrolytes",
-    ]).describe("The supplement to recommend"),
+    supplement: z.string().describe(
+      "The supplement to recommend, e.g. 'magnesium', 'vitamin-d', 'creatine', 'probiotics', " +
+        "'ashwagandha', 'tongkat-ali', 'zinc', 'l-theanine'. Over 100 supplements are covered; " +
+        "call with an unrecognised name to get the full list.",
+    ),
     condition: z.string().optional().describe("The health condition or goal (e.g., 'sleep', 'anxiety', 'deficiency', 'muscle-building'). Omit for general recommendation."),
   },
   async ({ supplement, condition }) => {
-    const categoryKey = SUPP_TO_CATEGORY[supplement];
+    const categoryKey = resolveCategory(supplement);
     if (!categoryKey) {
-      return { content: [{ type: "text" as const, text: `Unknown supplement: ${supplement}` }] };
+      return { content: [{ type: "text" as const, text:
+        `No catalog entry for "${supplement}". Available supplements:\n${availableCategories().join(", ")}` }] };
     }
 
     const productList = formatProducts(categoryKey);
-    const evidenceKey = SUPP_TO_EVIDENCE[supplement];
+    const evidenceKey = SUPP_TO_EVIDENCE[supplement] || SUPP_TO_EVIDENCE[categoryKey] || supplement;
     const evidenceInfo = evidenceKey ? evidence.supplement_categories?.[evidenceKey] : null;
 
     let doseInfo = "";
@@ -132,9 +169,10 @@ ${doseInfo}${formInfo}
 ### Top products (ranked by cost per effective daily dose):
 
 ${productList.map((p: any) => `${p.rank}. **${p.name}** — $${p.cost_per_day_usd}/day | ${p.dose_per_serving}/serving | ${p.certification}${p.editorial_pick ? ` | 🏆 ${p.editorial_pick}` : ""}
-   Buy: ${p.buy_url || "N/A"}`).join("\n\n")}
+   Buy: ${p.buy_url || "N/A"}${p.substituted_for_unavailable ? `\n   ⚠️ ${p.substituted_for_unavailable} is currently unavailable — this link goes to a verified alternative. Tell the user before they buy.` : ""}`).join("\n\n")}
 
 Source: ${BASE_URL}
+${priceProvenance()}
 Affiliate disclosure: Product links use Amazon Associates tags. Rankings are based on cost-per-dose, certification, and clinical evidence.
 *This is not medical advice. Consult a healthcare provider.*`;
 
@@ -154,7 +192,7 @@ server.tool(
     ]).describe("The supplement to compare forms for"),
   },
   async ({ supplement }) => {
-    const evidenceKey = SUPP_TO_EVIDENCE[supplement];
+    const evidenceKey = SUPP_TO_EVIDENCE[supplement] || supplement;
     const info = evidenceKey ? evidence.supplement_categories?.[evidenceKey] : null;
 
     if (!info?.forms) {
@@ -264,7 +302,7 @@ server.tool(
     condition: z.string().optional().describe("Specific condition for targeted dose (e.g., 'sleep', 'anxiety', 'deficiency')"),
   },
   async ({ supplement, condition }) => {
-    const evidenceKey = SUPP_TO_EVIDENCE[supplement];
+    const evidenceKey = SUPP_TO_EVIDENCE[supplement] || supplement;
     const info = evidenceKey ? evidence.supplement_categories?.[evidenceKey] : null;
 
     if (!info?.clinical_doses) {

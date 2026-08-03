@@ -1,13 +1,21 @@
 {
   "name": "supplement-advisor-mcp",
-  "version": "1.0.0",
-  "description": "MCP server providing evidence-based supplement recommendations. 17 supplements, 40+ condition endpoints, medication interaction checking, form comparison, and dosage guidance. Data from NIH DSLD, PubMed, NSF, and USP.",
+  "version": "2.0.0",
+  "description": "MCP server providing evidence-based supplement recommendations. Fetches the live catalog from verifiedsupplementdata.com (116 supplement categories, 730 products) with an offline fallback, so prices and product availability are never stale. Medication interaction checking, form comparison, and dosage guidance. Data from NIH DSLD, PubMed, NSF, and USP.",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
     "supplement-advisor-mcp": "dist/index.js"
   },
-  "keywords": ["mcp", "supplements", "health", "nutrition", "evidence-based", "dietary-supplements", "medication-interactions"],
+  "keywords": [
+    "mcp",
+    "supplements",
+    "health",
+    "nutrition",
+    "evidence-based",
+    "dietary-supplements",
+    "medication-interactions"
+  ],
   "homepage": "https://verifiedsupplementdata.com",
   "repository": {
     "type": "git",
@@ -16,7 +24,9 @@
   "license": "MIT",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "verify": "node scripts/verify.mjs",
+    "refresh-catalog": "node scripts/refresh-bundled-catalog.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.1",
@@ -25,5 +35,11 @@
   "devDependencies": {
     "@types/node": "^22.0.0",
     "typescript": "^5.7.0"
-  }
+  },
+  "files": [
+    "dist",
+    "data",
+    "README.md",
+    "LICENSE"
+  ]
 }
