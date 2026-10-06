@@ -1,6 +1,6 @@
 # Supplement Advisor MCP Server
 
-Evidence-based supplement recommendation MCP server. 19 supplements, 40+ conditions, medication interaction checking, form quality classification. Data sourced from NIH DSLD, PubMed, NSF, and USP.
+Evidence-based supplement recommendation MCP server. Reads the live product catalog from [verifiedsupplementdata.com](https://verifiedsupplementdata.com) (with an offline fallback), plus medication interaction checking and form comparisons. Data sourced from NIH DSLD, PubMed, NSF, and USP.
 
 Built for use with Claude, Cursor, Windsurf, and any MCP-compatible client.
 
